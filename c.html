@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAMMY KA SAMAY</title>
+    <link rel="stylesheet" href="c.css">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#" id="show-clock">Clock</a></li>
+            <li><a href="#" id="show-timer">Timer</a></li>
+            <li><a href="#" id="show-alarm">Alarm</a></li>
+            <li><a href="#" id="show-stopwatch">Stopwatch</a></li>
+            <!-- <li><a href="#" id="show-world-clock">World Clock</a></li> -->
+        </ul>
+    </nav>
+   
+    <main id="clock-container" class="section">
+        <h1 class="day" id="day"></h1>
+        <div class="box">
+            <div class ="clock">
+                <div class="front-clock">
+                    <div id="hour">00</div>
+                    <p>hour</p>
+                </div>
+            </div>
+            <div class ="clock">
+                <div class="front-clock">
+                    <div id="minute">00</div>
+                    <p>minute</p>
+                </div>
+            </div>
+            <div class ="clock">
+                <div class="front-clock">
+                    <div id="seconds">00</div>
+                    <p>seconds</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="timer-container" class="section">
+        <h1>Timer</h1>
+        <input type="number" id="timer-input" placeholder="Enter seconds">
+        <button onclick="startTimer()">Start Timer</button>
+        <div id="timer-display"></div>
+        <button id="stop-timer-sound" onclick="stopSound()" style="display: none;">Stop Sound</button>
+    </div>
+
+    <div id="alarm-container" class="section">
+        <h1>Alarm</h1>
+        <input type="time" id="alarm-time">
+        <button onclick="setAlarm()">Set Alarm</button>
+        <div id="alarm-message"></div>
+        <button id="stop-alarm-sound" onclick="stopSound()" style="display: none;">Stop Sound</button>
+    </div>
+
+    <div id="stopwatch-container" class="section">
+        <h1>Stopwatch</h1>
+        <div id="stopwatch-display">00:00:00</div>
+        <div>
+            <button onclick="startStopwatch()">Start</button>
+            <button onclick="stopStopwatch()">Stop</button>
+            <button onclick="recordLap()">Lap</button>
+            <button onclick="resetStopwatch()">Reset</button>
+            
+        </div>
+        <div id="lap-times"></div>
+    </div>
+
+    <audio id="alarm-sound" loop >
+        <source src="MUSIC_Intaha_ho_gai.mp3" type="audio/mp3">
+    </audio>
+
+    <script>
+        const hour = document.getElementById('hour');
+        const minute = document.getElementById('minute');
+        const seconds = document.getElementById('seconds');
+        const day = document.getElementById('day');
+
+        var monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+        const clock = setInterval(function time() {
+            let today = new Date();
+            let hr = today.getHours();
+            let min = today.getMinutes();
+            let sec = today.getSeconds();
+            let d = today.getDate();
+            let month = today.getMonth();
+            let year = today.getFullYear();
+            day.innerHTML = `${d} ${monthName[month]} ${year}`;
+            hour.textContent = hr < 10 ? `0${hr}` : hr;
+            minute.textContent = min < 10 ? `0${min}` : min;
+            seconds.textContent = sec < 10 ? `0${sec}` : sec;
+        });
+
+        let timer;
+        function startTimer() {
+            const secondsInput = document.getElementById('timer-input').value;
+            let time = parseInt(secondsInput);
+            if (isNaN(time) || time <= 0) {
+                alert("Please enter a valid number.");
+                return;
+            }
+
+            const timerDisplay = document.getElementById('timer-display');
+            timerDisplay.textContent = formatTime(time);
+            document.getElementById('stop-timer-sound').style.display = 'none';
+
+            timer = setInterval(() => {
+                time--;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    playAlarmSound();  // Play sound when timer finishes
+                    document.getElementById('stop-timer-sound').style.display = 'block'; // Show Stop button
+                } else {
+                    timerDisplay.textContent = formatTime(time);
+                }
+            }, 1000);
+        }
+
+        let alarmTime = null;
+        function setAlarm() {
+            const alarmInput = document.getElementById('alarm-time').value;
+            if (!alarmInput) {
+                alert("Please set a valid time.");
+                return;
+            }
+
+            const [hours, minutes] = alarmInput.split(':').map(Number);
+            alarmTime = new Date();
+            alarmTime.setHours(hours);
+            alarmTime.setMinutes(minutes);
+            alarmTime.setSeconds(0);
+            document.getElementById('alarm-message').textContent = `Alarm set for ${alarmTime.toLocaleTimeString()}`;
+            document.getElementById('stop-alarm-sound').style.display = 'none';
+            checkAlarm();
+        }
+
+        function checkAlarm() {
+            const interval = setInterval(() => {
+                const now = new Date();
+                if (now >= alarmTime) {
+                    clearInterval(interval);
+                    playAlarmSound();  
+                    document.getElementById('stop-alarm-sound').style.display = 'block'; 
+                }
+            }, 1000);
+        }
+
+        function playAlarmSound() {
+            const alarmSound = document.getElementById('alarm-sound');
+            alarmSound.play();
+        }
+
+        function stopSound() {
+            const alarmSound = document.getElementById('alarm-sound');
+            alarmSound.pause(); 
+            alarmSound.currentTime = 0; 
+            document.getElementById('stop-timer-sound').style.display = 'none'; 
+            document.getElementById('stop-alarm-sound').style.display = 'none'; 
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return `${hours < 10 ? '0' : ''}${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        let stopwatchInterval;
+        let stopwatchSeconds = 0;
+        let stopwatchRunning = false;
+        let laps = [];
+
+        function startStopwatch() {
+            if (!stopwatchRunning) {
+                stopwatchRunning = true;
+                stopwatchInterval = setInterval(() => {
+                    stopwatchSeconds++;
+                    document.getElementById('stopwatch-display').textContent = formatTime(stopwatchSeconds);
+                }, 1000);
+            }
+        }
+
+        function stopStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            stopwatchRunning = false;
+            stopwatchSeconds = 0;
+            document.getElementById('stopwatch-display').textContent = "00:00:00";
+            laps = [];
+            updateLapDisplay();
+        }
+
+        function recordLap() {
+            if (stopwatchRunning) {
+                const lapTime = formatTime(stopwatchSeconds);
+                laps.push(lapTime);
+                updateLapDisplay();
+            }
+        }
+
+        function updateLapDisplay() {
+            const lapContainer = document.getElementById('lap-times');
+            lapContainer.innerHTML = '';
+            if (laps.length > 0) {
+                const lapList = document.createElement('ul');
+                laps.forEach((lap, index) => {
+                    const lapItem = document.createElement('li');
+                    lapItem.textContent = `Lap ${index + 1}: ${lap}`;
+                    lapList.appendChild(lapItem);
+                });
+                lapContainer.appendChild(lapList);
+            }
+        }
+
+        document.getElementById('show-clock').addEventListener('click', () => {
+            showSection('clock-container');
+        });
+        document.getElementById('show-timer').addEventListener('click', () => {
+            showSection('timer-container');
+        });
+        document.getElementById('show-alarm').addEventListener('click', () => {
+            showSection('alarm-container');
+        });
+        document.getElementById('show-stopwatch').addEventListener('click', () => {
+            showSection('stopwatch-container');
+        });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+        }
+        showSection('clock-container');
+    </script>
+</body>
+</html>
