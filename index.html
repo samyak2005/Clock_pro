@@ -79,7 +79,6 @@
         const minute = document.getElementById('minute');
         const seconds = document.getElementById('seconds');
         const day = document.getElementById('day');
-
         var monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
         const clock = setInterval(function time() {
             let today = new Date();
@@ -94,7 +93,6 @@
             minute.textContent = min < 10 ? `0${min}` : min;
             seconds.textContent = sec < 10 ? `0${sec}` : sec;
         });
-
         let timer;
         function startTimer() {
             const secondsInput = document.getElementById('timer-input').value;
@@ -103,14 +101,12 @@
                 alert("Please enter a valid number.");
                 return;
             }
-
             const timerDisplay = document.getElementById('timer-display');
             timerDisplay.textContent = formatTime(time);
             document.getElementById('stop-timer-sound').style.display = 'none';
-
             timer = setInterval(() => {
                 time--;
-                if (time <= 0) {
+                if (time < 0) {
                     clearInterval(timer);
                     playAlarmSound();  // Play sound when timer finishes
                     document.getElementById('stop-timer-sound').style.display = 'block'; // Show Stop button
@@ -119,7 +115,6 @@
                 }
             }, 1000);
         }
-
         let alarmTime = null;
         function setAlarm() {
             const alarmInput = document.getElementById('alarm-time').value;
@@ -127,7 +122,6 @@
                 alert("Please set a valid time.");
                 return;
             }
-
             const [hours, minutes] = alarmInput.split(':').map(Number);
             alarmTime = new Date();
             alarmTime.setHours(hours);
@@ -137,7 +131,6 @@
             document.getElementById('stop-alarm-sound').style.display = 'none';
             checkAlarm();
         }
-
         function checkAlarm() {
             const interval = setInterval(() => {
                 const now = new Date();
@@ -148,12 +141,10 @@
                 }
             }, 1000);
         }
-
         function playAlarmSound() {
             const alarmSound = document.getElementById('alarm-sound');
             alarmSound.play();
         }
-
         function stopSound() {
             const alarmSound = document.getElementById('alarm-sound');
             alarmSound.pause(); 
@@ -161,19 +152,16 @@
             document.getElementById('stop-timer-sound').style.display = 'none'; 
             document.getElementById('stop-alarm-sound').style.display = 'none'; 
         }
-
         function formatTime(seconds) {
             const hours = Math.floor(seconds / 3600);
             const mins = Math.floor((seconds % 3600) / 60);
             const secs = seconds % 60;
             return `${hours < 10 ? '0' : ''}${hours}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
-
         let stopwatchInterval;
         let stopwatchSeconds = 0;
         let stopwatchRunning = false;
         let laps = [];
-
         function startStopwatch() {
             if (!stopwatchRunning) {
                 stopwatchRunning = true;
@@ -183,12 +171,10 @@
                 }, 1000);
             }
         }
-
         function stopStopwatch() {
             clearInterval(stopwatchInterval);
             stopwatchRunning = false;
         }
-
         function resetStopwatch() {
             clearInterval(stopwatchInterval);
             stopwatchRunning = false;
@@ -197,7 +183,6 @@
             laps = [];
             updateLapDisplay();
         }
-
         function recordLap() {
             if (stopwatchRunning) {
                 const lapTime = formatTime(stopwatchSeconds);
@@ -205,7 +190,6 @@
                 updateLapDisplay();
             }
         }
-
         function updateLapDisplay() {
             const lapContainer = document.getElementById('lap-times');
             lapContainer.innerHTML = '';
